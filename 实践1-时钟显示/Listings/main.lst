@@ -1,0 +1,303 @@
+C51 COMPILER V9.00   MAIN                                                                  11/08/2020 23:28:19 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          
+   4          typedef unsigned char u8;
+   5          typedef unsigned int u16;
+   6          void delay(u16 i){
+   7   1        while(i--);
+   8   1      }
+   9          
+  10          //74HC573锁存器
+  11          //OE=1 开始工作--1脚
+  12          //vcc--20脚 
+  13          //GND--10脚
+  14          //LE=1 正常--11脚
+  15          //LE=0 锁存--11脚
+  16          
+  17          #define smg P0 //使用P0口对74HC573进行控制
+  18          
+  19          //38译码器的输入
+  20          sbit LSA=P2^2;
+  21          sbit LSB=P2^3;
+  22          sbit LSC=P2^4;
+  23          u8 code smgduan[]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71};
+  24          
+  25          //时分秒
+  26          u8 Hour,Minute,Second;
+  27          
+  28          //外部中断
+  29          sbit k32=P3^2;//选择时分
+  30          sbit k33=P3^3;//加1
+  31          
+  32          u8 IF_PRESS;//是否按过按键
+  33          u8 TIME_LOCATION;//编辑哪一位0 编辑时，1编辑分，2重置秒
+  34          u8 RESET_TIME_INIT=10,RESET_TIME=10;//在20秒内没有操作，取消闪烁
+  35          
+  36          
+  37          //外部中断0初始化
+  38          void Init0Init(){
+  39   1        IT0=1;//下降沿有效
+  40   1        EX0=1;
+  41   1        EA=1;
+  42   1      }
+  43          //外部中断2初始化
+  44          void Init1Init(){
+  45   1        IT1=1;//下降沿有效
+  46   1        EX1=1;
+  47   1        EA=1;
+  48   1      }
+  49          //定时器初始化
+  50          void TimeroInit(){
+  51   1        TMOD|=0x01;//定时器0工作方式1。GATA=0
+  52   1        
+  53   1        //  机器周期 1/12/12=1us   1000*1=1ms 计数1000次用时1ms  TH0 TL0初始值 65536-1000=FC18
+  54   1        TH0=0xFC;//定时1ms TH0初始值
+C51 COMPILER V9.00   MAIN                                                                  11/08/2020 23:28:19 PAGE 2   
+
+  55   1        TL0=0x18;//定时1ms TL0初始值
+  56   1        
+  57   1        ET0=1;
+  58   1        EA=1;
+  59   1        TR0=1;//tcon 控制定时或计数开启
+  60   1      }
+  61          
+  62          
+  63          void DidDispaly();//动态扫描数码管显示数字
+  64          void DispalyHourMinuteSecond(u8 i);//一秒替换掉数码管上的数字
+  65          
+  66          void main()
+  67          {
+  68   1      
+  69   1        Init0Init();
+  70   1        Init1Init();
+  71   1        TimeroInit();
+  72   1        while(1){
+  73   2          DidDispaly();
+  74   2        }
+  75   1        
+  76   1      }
+  77          void Int0() interrupt 0
+  78          {
+  79   1        delay(1000);
+  80   1        
+  81   1        if(k32==0){
+  82   2          if(IF_PRESS){//第一次按键默认编辑时
+  83   3            TIME_LOCATION++;
+  84   3          }
+  85   2          IF_PRESS=1;
+  86   2          if(TIME_LOCATION==3){
+  87   3            TIME_LOCATION=0;
+  88   3          }
+  89   2          RESET_TIME=RESET_TIME_INIT;
+  90   2        }
+  91   1      }
+  92          void Int1() interrupt 2
+  93          {
+  94   1        delay(7000);
+  95   1        
+  96   1        if(k33==0){
+  97   2          if(IF_PRESS==1){
+  98   3             switch(TIME_LOCATION){
+  99   4               case 0://编辑时
+ 100   4                 Hour++;
+ 101   4                 if(Hour==24){
+ 102   5                    Hour=0;
+ 103   5                 }
+ 104   4                 break; 
+ 105   4               case 1://编辑分
+ 106   4                 Minute++;
+ 107   4                 if(Minute==60){
+ 108   5                    Minute=0;
+ 109   5                 }
+ 110   4                 break;      
+ 111   4               case 2://编辑秒
+ 112   4                 Second=0;
+ 113   4                 break;      
+ 114   4             
+ 115   4             }
+ 116   3             RESET_TIME=RESET_TIME_INIT;
+C51 COMPILER V9.00   MAIN                                                                  11/08/2020 23:28:19 PAGE 3   
+
+ 117   3          }
+ 118   2        }
+ 119   1      }
+ 120          void Time0() interrupt 1
+ 121          {
+ 122   1        static u16 i;
+ 123   1        TH0=0xFC;//定时1ms TH0初始值
+ 124   1        TL0=0x18;//定时1ms TL0初始值
+ 125   1        i++;
+ 126   1        if(i==1000){//中断1000次 1秒
+ 127   2          i=0;
+ 128   2          Second++;
+ 129   2          RESET_TIME--;
+ 130   2          if(!RESET_TIME){
+ 131   3            IF_PRESS=0;
+ 132   3            TIME_LOCATION=0;
+ 133   3          }
+ 134   2          if(Second==60){
+ 135   3            Second=0;
+ 136   3            Minute++;
+ 137   3            if(Minute==60){
+ 138   4              Minute=0;
+ 139   4              Hour++;
+ 140   4              if(Hour==24){
+ 141   5                Hour=0;
+ 142   5              }
+ 143   4            }
+ 144   3          }
+ 145   2          
+ 146   2        }
+ 147   1      }
+ 148          
+ 149          void DidDispaly(){
+ 150   1        u8 i;
+ 151   1        for(i=0;i<8;i++){
+ 152   2          switch(i){
+ 153   3            case 0:
+ 154   3              LSA=0;LSB=0;LSC=0;
+ 155   3              break;
+ 156   3            case 1:
+ 157   3              LSA=0;LSB=0;LSC=1;
+ 158   3              break;  
+ 159   3            case 2:
+ 160   3              LSA=0;LSB=1;LSC=0;
+ 161   3              break;  
+ 162   3            case 3:
+ 163   3              LSA=0;LSB=1;LSC=1;
+ 164   3              break;  
+ 165   3            case 4:
+ 166   3              LSA=1;LSB=0;LSC=0;
+ 167   3              break;    
+ 168   3            case 5:
+ 169   3              LSA=1;LSB=0;LSC=1;
+ 170   3              break;
+ 171   3            case 6:
+ 172   3              LSA=1;LSB=1;LSC=0;
+ 173   3              break;
+ 174   3            case 7:
+ 175   3              LSA=1;LSB=1;LSC=1;
+ 176   3              break;
+ 177   3          }
+ 178   2          DispalyHourMinuteSecond(i);//显示对应的数字
+C51 COMPILER V9.00   MAIN                                                                  11/08/2020 23:28:19 PAGE 4   
+
+ 179   2          delay(100);
+ 180   2          smg = 0x00;
+ 181   2        }
+ 182   1      }
+ 183          
+ 184          void DispalyHourMinuteSecond(u8 i){
+ 185   1        switch(i){
+ 186   2            case 0://时的十位
+ 187   2              if(IF_PRESS&&TIME_LOCATION==0){
+ 188   3                if(Second%3!=0){
+ 189   4                  smg = smgduan[Hour/10];
+ 190   4                }else{
+ 191   4                  smg = 0x00;
+ 192   4                }
+ 193   3              }else{
+ 194   3                smg = smgduan[Hour/10];
+ 195   3              }
+ 196   2              
+ 197   2              break;    
+ 198   2            case 1://时的个位
+ 199   2              if(IF_PRESS&&TIME_LOCATION==0){
+ 200   3                if(Second%3!=0){
+ 201   4                    smg = smgduan[Hour%10];
+ 202   4                }else{
+ 203   4                  smg = 0x00;
+ 204   4                }
+ 205   3              }else{
+ 206   3                  smg = smgduan[Hour%10];
+ 207   3              }
+ 208   2              break;    
+ 209   2            case 2://点的闪烁
+ 210   2              if(Second%2==1){
+ 211   3                smg = 0x40;
+ 212   3              }else{
+ 213   3                smg = 0x00;
+ 214   3              }
+ 215   2              break;    
+ 216   2            case 3://分的十位
+ 217   2              if(IF_PRESS&&TIME_LOCATION==1){
+ 218   3                if(Second%3!=0){
+ 219   4                    smg = smgduan[Minute/10];
+ 220   4                }else{
+ 221   4                  smg = 0x00;
+ 222   4                }
+ 223   3              }else{
+ 224   3                  smg = smgduan[Minute/10];
+ 225   3              }
+ 226   2              break;    
+ 227   2            case 4://分的个位
+ 228   2              if(IF_PRESS&&TIME_LOCATION==1){
+ 229   3                if(Second%3!=0){
+ 230   4                    smg = smgduan[Minute%10];
+ 231   4                }else{
+ 232   4                  smg = 0x00;
+ 233   4                }
+ 234   3              }else{
+ 235   3                  smg = smgduan[Minute%10];
+ 236   3              }
+ 237   2              break;    
+ 238   2            case 5://点闪烁
+ 239   2              if(Second%2==1){
+ 240   3                smg = 0x40;
+C51 COMPILER V9.00   MAIN                                                                  11/08/2020 23:28:19 PAGE 5   
+
+ 241   3              }else{
+ 242   3                smg = 0x00;
+ 243   3              }
+ 244   2              break;
+ 245   2            case 6://秒的十位
+ 246   2              if(IF_PRESS&&TIME_LOCATION==2){
+ 247   3                if(Second%2==1){
+ 248   4                      smg = smgduan[Second/10];
+ 249   4                }else{
+ 250   4                  smg = 0x00;
+ 251   4                }
+ 252   3              }else{
+ 253   3                    smg = smgduan[Second/10];
+ 254   3              }
+ 255   2            
+ 256   2              break;
+ 257   2            case 7://秒的个位
+ 258   2              if(IF_PRESS&&TIME_LOCATION==2){
+ 259   3                if(Second%2==1){
+ 260   4                  smg = smgduan[Second%10];
+ 261   4                }else{
+ 262   4                  smg = 0x00;
+ 263   4                }
+ 264   3              }else{
+ 265   3                  smg = smgduan[Second%10];
+ 266   3              }
+ 267   2            
+ 268   2              break;
+ 269   2          }
+ 270   1      }
+ 271          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    613    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

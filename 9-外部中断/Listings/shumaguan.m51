@@ -1,0 +1,154 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    11/08/2020  13:47:38  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj TO .\Objects\shumaguan PRINT (.\Listings\shumaguan.m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\shumaguan (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            IDATA   0008H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0003H     ABSOLUTE     
+                    0006H     000DH                  *** GAP ***
+            CODE    0013H     0003H     ABSOLUTE     
+                    0016H     07EAH                  *** GAP ***
+            CODE    0800H     0024H     UNIT         ?PR?INT0?MAIN
+            CODE    0824H     0024H     UNIT         ?PR?INT1?MAIN
+            CODE    0848H     000CH     UNIT         ?C_C51STARTUP
+            CODE    0854H     000BH     UNIT         ?PR?_DELAY?MAIN
+            CODE    085FH     0008H     UNIT         ?PR?MAIN?MAIN
+            CODE    0867H     0007H     UNIT         ?PR?INIT0INIT?MAIN
+            CODE    086EH     0007H     UNIT         ?PR?INIT1INIT?MAIN
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\shumaguan (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?PR?INT0?MAIN
+  +--> ?PR?_DELAY?MAIN
+
+*** NEW ROOT ***************************************************
+
+?PR?INT1?MAIN
+  +--> ?PR?_DELAY?MAIN
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+
+?PR?MAIN?MAIN
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  11/08/2020  13:47:38  PAGE 2
+
+
+  +--> ?PR?INIT0INIT?MAIN
+  +--> ?PR?INIT1INIT?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\shumaguan (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  D:00A8H         PUBLIC        IE
+  C:0854H         PUBLIC        _delay
+  D:00B8H         PUBLIC        IP
+  C:085FH         PUBLIC        main
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  B:00A8H.0       PUBLIC        EX0
+  B:0088H.0       PUBLIC        IT0
+  B:00A8H.2       PUBLIC        EX1
+  B:0088H.2       PUBLIC        IT1
+  B:00B0H.2       PUBLIC        k32
+  B:00B0H.3       PUBLIC        k33
+  B:00A0H.0       PUBLIC        LED
+  C:0800H         PUBLIC        Int0
+  C:0824H         PUBLIC        Int1
+  C:0867H         PUBLIC        Init0Init
+  C:086EH         PUBLIC        Init1Init
+  D:00C8H         PUBLIC        T2CON
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _DELAY
+  D:0006H         SYMBOL        i
+  C:0854H         LINE#         10
+  C:0854H         LINE#         11
+  C:085EH         LINE#         12
+  -------         ENDPROC       _DELAY
+  -------         PROC          INIT0INIT
+  C:0867H         LINE#         14
+  C:0867H         LINE#         15
+  C:0869H         LINE#         16
+  C:086BH         LINE#         17
+  C:086DH         LINE#         18
+  -------         ENDPROC       INIT0INIT
+  -------         PROC          INIT1INIT
+  C:086EH         LINE#         20
+  C:086EH         LINE#         21
+  C:0870H         LINE#         22
+  C:0872H         LINE#         23
+  C:0874H         LINE#         24
+  -------         ENDPROC       INIT1INIT
+  -------         PROC          MAIN
+  C:085FH         LINE#         26
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  11/08/2020  13:47:38  PAGE 3
+
+
+  C:085FH         LINE#         27
+  C:085FH         LINE#         29
+  C:0862H         LINE#         30
+  C:0865H         LINE#         31
+  C:0865H         LINE#         33
+  -------         ENDPROC       MAIN
+  -------         PROC          INT0
+  C:0800H         LINE#         37
+  C:080DH         LINE#         39
+  C:0814H         LINE#         41
+  C:0817H         LINE#         42
+  C:0819H         LINE#         43
+  C:0819H         LINE#         44
+  -------         ENDPROC       INT0
+  -------         PROC          INT1
+  C:0824H         LINE#         45
+  C:0831H         LINE#         47
+  C:0838H         LINE#         49
+  C:083BH         LINE#         50
+  C:083DH         LINE#         51
+  C:083DH         LINE#         52
+  -------         ENDPROC       INT1
+  -------         ENDMOD        MAIN
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 006FH BYTE ( 5%) *
+******************************************************************************
+
+Program Size: data=9.0 xdata=0 code=126
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

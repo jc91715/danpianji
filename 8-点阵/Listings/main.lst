@@ -1,0 +1,146 @@
+C51 COMPILER V9.00   MAIN                                                                  11/07/2020 23:36:29 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <intrins.h>
+   3          
+   4          typedef unsigned char u8;
+   5          typedef unsigned int u16;
+   6          
+   7          sbit SRCLK=P3^6;
+   8          sbit RCLK1=P3^5;
+   9          sbit SER=P3^4;
+  10          
+  11          //u8 code smgduan[]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71};
+  12          
+  13          u8 code ledduan[]={0x00,0x00,0x3e,0x41,0x41,0x41,0x3e,0x00};
+  14          u8 code ledwei[]={0x7f,0xbf,0xdf,0xef,0xf7,0xfb,0xfd,0xfe};
+  15          
+  16          u8 code CHARCODE[18][8]={
+  17          {0x00,0x00,0x3e,0x41,0x41,0x41,0x3e,0x00}, //0
+  18          {0x00,0x00,0x00,0x00,0x21,0x7f,0x01,0x00}, //1
+  19          {0x00,0x00,0x27,0x45,0x45,0x45,0x39,0x00}, //2
+  20          {0x00,0x00,0x22,0x49,0x49,0x49,0x36,0x00}, //3
+  21          {0x00,0x00,0x0c,0x14,0x24,0x7f,0x04,0x00}, //4
+  22          {0x00,0x00,0x72,0x51,0x51,0x51,0x4e,0x00}, //5
+  23          {0x00,0x00,0x3e,0x49,0x49,0x49,0x26,0x00}, //6
+  24          {0x00,0x00,0x40,0x40,0x40,0x4f,0x70,0x00}, //7
+  25          {0x00,0x00,0x36,0x49,0x49,0x49,0x36,0x00}, //8
+  26          {0x00,0x00,0x32,0x49,0x49,0x49,0x3e,0x00}, //9
+  27          {0x00,0x00,0x7F,0x48,0x48,0x30,0x00,0x00}, //P
+  28          {0x00,0x00,0x7F,0x48,0x4C,0x73,0x00,0x00}, //R
+  29          {0x00,0x00,0x7F,0x49,0x49,0x49,0x00,0x00}, //E
+  30          {0x00,0x00,0x3E,0x41,0x41,0x62,0x00,0x00}, //C
+  31          {0x00,0x00,0x7F,0x08,0x08,0x7F,0x00,0x00}, //H
+  32          {0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00}, //I
+  33          {0x00,0x7F,0x10,0x08,0x04,0x7F,0x00,0x00}, //N
+  34          {0x7C,0x48,0x48,0xFF,0x48,0x48,0x7C,0x00}  //ÖÐ
+  35          };
+  36          
+  37          void delay(u16 i){
+  38   1        while(i--);
+  39   1      }
+  40          
+  41          //ÏÔÊ¾Ò»ÁÐ ½ÚÊ¡ÁËIO¿Ú
+  42          void Hc595SendByte(u8 dat){
+  43   1        
+  44   1        u8 a;
+  45   1        SRCLK=0;
+  46   1        RCLK1=0;
+  47   1        
+  48   1        for(a=0;a<8;a++){
+  49   2          SER=dat>>7;//´«×î¸ßÎ»£¬Ã»ÓÐ¸Ä±ädatµÄÖµ
+  50   2          dat<<=1;//ÈÃµÚ¶þÎ»ÔÚ×î¸ßÎ»£¬ÏÂÒ»´Î·¢ËÍ
+  51   2          SRCLK=1;//ÉÏÉýÑØÓÐÐ§
+  52   2          _nop_();
+  53   2          _nop_();
+  54   2          SRCLK=0;//ÎªÁËÏÂÒ»´ÎÉÏÉý
+C51 COMPILER V9.00   MAIN                                                                  11/07/2020 23:36:29 PAGE 2   
+
+  55   2        }
+  56   1        RCLK1=1;
+  57   1        _nop_();
+  58   1        _nop_();
+  59   1        RCLK1=0;
+  60   1      
+  61   1      }
+  62          
+  63          ////ÏÔÊ¾Êý×Ö0
+  64          //void main()
+  65          //{
+  66          //  u8 i;
+  67          //  
+  68          ////  Hc595SendByte(0x80);//×î¸ßÎ»¸ßµçÆ½
+  69          ////  P0=0x7f;//
+  70          //  while(1){
+  71          //    P0=0x7f;//µÚÒ»ÁÐµãÁÁ
+  72          //    for(i=0;i<8;i++){//¶¯Ì¬É¨ÃèÏÔÊ¾8ÁÐ
+  73          //      P0=ledwei[i];//ÒÀ´ÎµãÁÁÃ¿-ÁÐ£¨µ±Ã¿Ò»ÁÐÓÐ¸ßµçÆ½µÄÊ±ºò£¬Õâ¸öµã²ÅÁÁ£©£¬Ïàµ±ÓÚ£¬ÔÚÕâÒ»ÁÐµÄÊ±ºò£¬ÏÔÊ¾Ê²Ã´Ê
+             -ý×Ö£¬ºÍÊýÂë¹ÜÏÔÊ¾Ò»¸öÔ­Àí
+  74          //      Hc595SendByte(ledduan[i]);//¸ßµçÆ½ÓÐÐ§
+  75          //      delay(100);
+  76          //      Hc595SendByte(0x00);
+  77          //    }
+  78          //  }
+  79          //  
+  80          //}
+  81          
+  82          void xunhuan(u8 i,u8 j){
+  83   1          for(i=0;i<8;i++){//¶¯Ì¬É¨ÃèÏÔÊ¾8ÁÐ
+  84   2              P0=ledwei[i];//ÒÀ´ÎµãÁÁÃ¿-ÁÐ£¨µ±Ã¿Ò»ÁÐÓÐ¸ßµçÆ½µÄÊ±ºò£¬Õâ¸öµã²ÅÁÁ£©£¬Ïàµ±ÓÚ£¬ÔÚÕâÒ»ÁÐµÄÊ±ºò£¬ÏÔÊ¾Ê²Ã´Êý
+             -×Ö£¬ºÍÊýÂë¹ÜÏÔÊ¾Ò»¸öÔ­Àí
+  85   2              Hc595SendByte(CHARCODE[j][i]);//¸ßµçÆ½ÓÐÐ§ 
+  86   2              delay(100);
+  87   2              Hc595SendByte(0x00);
+  88   2            }
+  89   1      }
+  90          
+  91          //¶¯Ì¬ÏÔÊ¾Êý×Ö
+  92          void main()
+  93          {
+  94   1        u8 ti,i,j=0;
+  95   1        
+  96   1        while(1){
+  97   2          //delay(50000);
+  98   2          //P0=0xff;
+  99   2          
+ 100   2          
+ 101   2          for(ti=0;ti<50000;ti++){
+ 102   3            xunhuan(i,j);
+ 103   3          }
+ 104   2        
+ 105   2      
+ 106   2          
+ 107   2          delay(50000);
+ 108   2          j++;
+ 109   2          
+ 110   2          if(j == 18){
+ 111   3            j = 0;
+ 112   3          }
+ 113   2          
+ 114   2        }
+C51 COMPILER V9.00   MAIN                                                                  11/07/2020 23:36:29 PAGE 3   
+
+ 115   1        
+ 116   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    159    ----
+   CONSTANT SIZE    =    160    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
